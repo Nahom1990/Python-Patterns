@@ -1,38 +1,23 @@
 """Bridge Project — Report Generation System
-
 You are building a system that generates different kinds of business reports.
-
 The system has two independent dimensions.
 
-Dimension 1: Report type
+###  Dimension 1: Report type
 
 The application supports:
 
-Sales Report
-Inventory Report
-Performance Report
-
+1. Sales Report
+2. Inventory Report
+3. Performance Report
 Each report has different logic for gathering/preparing its data.
 
-Conceptually:
-
-SalesReport
-InventoryReport
-PerformanceReport
-Dimension 2: Renderer
+####Dimension 2: Renderer
 
 Each report can be rendered using:
 
-PDF
-HTML
-JSON
-
-Conceptually:
-
-PDFRenderer
-HTMLRenderer
-JSONRenderer
-The problem
+1. PDF
+2. HTML
+3. JSON
 
 Without a good design, someone might create:
 
@@ -64,22 +49,19 @@ The intended conceptual relationship is:
                     ▼
                  RENDERER
 
-But you must decide the details yourself.
 
 Functional requirements
 
 Your application should allow combinations like:
-
+Every report should be able to work with every renderer.
+ 
 SalesReport(PDFRenderer())
 SalesReport(JSONRenderer())
 InventoryReport(HTMLRenderer())
 PerformanceReport(PDFRenderer())
 
-Every report should be able to work with every renderer.
 
 Each report should have its own data
-
-You don't need a real database.
 
 For example, each report can prepare data differently:
 
@@ -186,3 +168,120 @@ functions
 dictionaries
 plain data
 callable objects if you want"""
+
+
+
+
+###Version 1 classic Python
+from abc import ABC,abstractmethod
+class Renderer(ABC):
+    @abstractmethod
+    def render(self,data):
+        pass
+class PDFRenderer(Renderer):
+    def render(self,data):
+        print(f"rendered{data} in PDF")
+
+class HTMLRenderer(Renderer):
+    def render(self,data):
+        print(f"rendered{data} in HTML")
+class JSONRenderer(Renderer):
+    def render(self,data):
+        print(f"rendered{data} in JSON")
+
+
+class ReportType:
+    def __init__(self,renderer:Renderer) -> None:
+        self.renderer=renderer
+
+class SalesReport(ReportType): ##made same to inventory and performance report because ots example but even though they share the report method their operations inside would be different
+    def report(self,data):
+        self.renderer.render(data=data)
+
+class InventoryReport(ReportType):
+    def report(self,data):
+        self.renderer.render(data=data)
+class PerfomanceReport(ReportType):
+    def report(self,data):
+        self.renderer.render(data=data)
+
+
+pdf_report=SalesReport(PDFRenderer())
+pdf_report.report(data={
+                            "total_sales": 100000,
+                            "orders": 250
+                        })
+
+
+#####version 2
+from typing import Protocol
+class Renderer2(Protocol):
+    def render(self,data): ...
+
+class PDFRenderer2:
+    def render(self,data):
+        print(f"rendering {data} in pdf")
+
+class HTMLRenderer2:
+    def render(self,data):
+        print(f"rendering {data} in html")
+
+class JSONRenderer2:
+    def render(self,data):
+        print(f"rendering {data} in json")
+
+class ReportType2:
+    def __init__(self,renderer:Renderer2) -> None:
+        self.renderer=renderer
+
+class SalesReport2(ReportType2):
+    def report(self,data):
+        self.renderer.render(data=data)
+
+class InventoryReport2(ReportType2):
+    def report(self,data):
+        self.renderer.render(data=data)
+class PerfomanceReport2(ReportType2):
+    def report(self,data):
+        self.renderer.render(data=data)
+
+
+pdf_report=SalesReport2(PDFRenderer2())
+pdf_report.report(data={
+                            "total_sales": 100000,
+                            "orders": 250
+                        })
+
+
+###version 3 functional or procedural 
+
+from typing import Callable,Any,Dict
+
+
+#pure rendering functions
+def render_pdf_fn(data:Any)->None:
+    print(f"[functional] rendering PDF: {data}")
+
+def render_html_fn(data:Any)->None:
+    print(f"[functional] rendering html")
+
+def render_json_fn(data:Any)-> None:
+    print(f"[dunctional] rendering json")
+
+def make_sales_report(renderer:Callable[[Any],None])->Callable[[Dict[str,Any]],None]:
+    def report(data:Dict[str,Any])->None:
+        report_payload = {
+            "title": "Sales Report",
+            "total_sales": data.get("total_sales"),
+            "orders": data.get("orders")
+        }
+        renderer(report_payload)
+    return report
+
+
+sales_data={"total_sales":100000,"orders":250}
+
+pdf_sales_repoter=make_sales_report(render_pdf_fn)
+pdf_sales_repoter(sales_data)
+json_saled_repoter=make_sales_report(render_json_fn)
+json_saled_repoter(sales_data)
