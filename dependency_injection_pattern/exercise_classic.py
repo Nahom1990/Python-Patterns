@@ -88,6 +88,18 @@ register_user(
 Functions can be dependencies too.
 
 So DI is not an OOP-only concept.
+
+Excellent DI candidates.
+Database
+Redis
+HTTP client
+LLM client
+Email provider
+File storage
+Clock
+Payment gateway
+
+
 """
 
 ###### Version 1 ####

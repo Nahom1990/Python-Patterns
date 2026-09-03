@@ -1,0 +1,1 @@
+#No functional approcah repository pattern is better served wiht the class
