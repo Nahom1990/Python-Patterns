@@ -283,6 +283,13 @@ def transition(doc: Document, action: Action) -> tuple[Document, str]:
     """
     Pure function: Given an immutable Document and an Action, returns a tuple of
     (New Document Instance, Status Message).
+
+    And here all the match cases are not spread around different functions its collected unde one function 
+    under transitions so better approach here also, no hunting for each all are available here,
+
+    also the match case is 2 dimensional before we were just matching the state to one of the [DRAFT,INREVIEW,PUBLISHED and ARCHIVED],
+    but this one does that and the action [edit,submit,approve,reject,archive] here at the same time so both are cheked at once 
+    in a tuple rather then the above approach this is what elped everyting to be collected as is down below.
     """
     match (doc.state, action):
         # --- Edit ---
