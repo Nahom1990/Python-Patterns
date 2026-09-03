@@ -34,6 +34,8 @@ Pythonic version
 Functional version
     Use functions as observers
     No observer classes"""
+
+    
 ###version 1####
 from abc import ABC,abstractmethod
 
