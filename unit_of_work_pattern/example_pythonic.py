@@ -1,3 +1,4 @@
+#most recommended way
 from dataclasses import dataclass
 from typing import Any, Callable, List, Optional, Protocol, Self, TypeVar
 

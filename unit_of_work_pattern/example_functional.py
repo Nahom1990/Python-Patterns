@@ -1,3 +1,5 @@
+#Conceptually clean, but practically awkward in Python.
+
 from dataclasses import dataclass
 from typing import Callable, TypeVar, Any
 
