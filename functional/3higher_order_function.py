@@ -72,6 +72,21 @@ elif transformation == "square":
 
 The transformation itself must be supplied as a function.
 
+"""
+transforamtions=[double,square,add_five]
+def process_pipeline(numbers,transformations):
+    new_numbers=numbers
+    for transformation in transformations:
+        new_numbers=apply_transforamtion(new_numbers,transformation)
+
+    return new_numbers
+
+
+
+        
+
+"""
+
 Then add a second higher-order function:
 
 process_pipeline(numbers, transformations)
