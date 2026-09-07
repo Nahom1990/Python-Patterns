@@ -290,6 +290,7 @@ Create:
 
 create_discount_rule(rate)
 
+
 It should return a function.
 
 So you can do:
@@ -348,31 +349,29 @@ def run():
 
 is allowed."""
 
-
+import copy
 customers = [
     {"name": "  nahom mekuria  ", "age": 27, "country": "Ethiopia"},
     {"name": " abebe kebede ", "age": 16, "country": "Ethiopia"},
     {"name": "  john smith", "age": 31, "country": "USA"},
 ]
 
-def clean_names(customers):
-    new_customers=customers
-    for customer in new_customers:
-        customer["name"]=" ".join(customer["name"].split())
-    return new_customers
+def clean_names(customers:list[dict])->list[dict]:
+    return [ {**customer,"name":" ".join(customer["name"].split())} for customer in customers]
 
 
 def mark_adults(customers):
-    new_customers=customers
-    for customer in new_customers:
-        customer["is_adult"]=customer["age"]>=18
-    return new_customers
+    return [ {**customer,"is_adult":customer["age"]>=18} for customer in customers]
 
-def add_country_code(customers):
-    new_customers=customers
-    for customer in new_customers:
-        customer["country_code"]="ET" if customer["country"]=="Ethiopia" else "US" 
-    return new_customers
+
+COUNTRY_MAP = {
+    "Ethiopia": "ET",
+    "USA": "US"
+}
+def add_country_code(customers: list[dict]) -> list[dict]:
+    """Returns a new list with a 'country_code' key mapped from the country name."""
+    return [{**customer, "country_code": COUNTRY_MAP.get(customer["country"], "UNKNOWN")} for customer in customers]
+
 
 functions=[clean_names,mark_adults,add_country_code]
 
@@ -462,4 +461,93 @@ has_business_name = create_slot_validator("business_name")
 
 
 def clean_user_name(application):
-    return {**application,}
+    return {**application,"user":{**application["user"],"name":" ".join(application["user"]["name"].split())}}
+
+def modify_state(application,status):
+    return update_status(application,status)
+    
+     
+def validate_requirements(application):
+    missing=failed(rules=rules,application=application)
+    if not missing:
+        return {**application,"valid":True}
+    return {**application,"valid":False}
+
+
+    
+############## Challenge 3 #######
+
+
+
+def clean_customer_name(order):
+    return {**order,"customer":" ".join(order["customer"].split())}
+
+def calculate_subtotal(order):
+    return {**order,"subtotal": sum(item["price"]*item["quantity"] for item in order["items"])}
+
+def calculate_discount(order):
+    return {**order,"discount":order["subtotal"]*order["discount_rate"]/100}
+
+def calculate_tax(order):
+    return {**order,"tax":(order["subtotal"]-order["discount"])*order["tax_rate"]/100}
+
+def total(order):
+    return {**order,"total":order["subtotal"]-order["discount"]+order["tax"]}
+
+
+#higher order function
+def apply_pricing_rule(order,rule):
+    return rule(order)
+
+def ten_percent_discount(order):
+    return {**order,"discount_rate":10}
+
+def fifteen_percent_tax(order):
+    return {**order,"tax_rate":15}
+
+
+## functions in DS
+pricing_rule={
+    "10_discount":ten_percent_discount,
+    "15_tax_rate":fifteen_percent_tax
+}
+
+###closure
+def create_discount_rule(rate):
+    def create_discount_rule(order):
+        return {**order,"discount_rate":rate}
+    return create_discount_rule
+
+discount_10=create_discount_rule(10)
+
+#can use either 1=ten_percent_discount , 
+# or 2= pricing_rule["10_discount"] or 
+# 3=discount_10 in the pipeline
+
+def pipe2(*functions):
+    def piped(order):
+        for function in functions:
+            order=function(order)
+        return order
+    return piped
+
+
+
+process_order=pipe2(clean_customer_name,calculate_subtotal,discount_10,fifteen_percent_tax,calculate_discount,calculate_tax,total)
+
+
+
+def run():
+    order=order = {
+    "customer": " Nahom ",
+    "items": [
+        {"name": "Laptop", "price": 1000, "quantity": 1},
+        {"name": "Mouse", "price": 50, "quantity": 2},
+    ],
+    "country": "Ethiopia"
+    }
+    result=process_order(order)
+    print(result)
+
+run()
+
